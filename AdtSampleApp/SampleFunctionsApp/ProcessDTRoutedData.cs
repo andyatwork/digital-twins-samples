@@ -38,8 +38,8 @@ namespace SampleFunctionsApp
             // Authenticate on ADT APIs
             try
             {
-                ManagedIdentityCredential cred = new ManagedIdentityCredential(adtAppId);
-                client = new DigitalTwinsClient(new Uri(adtInstanceUrl), cred, new DigitalTwinsClientOptions { Transport = new HttpClientTransport(httpClient) });
+                var credentials = new DefaultAzureCredential(true);
+                client = new DigitalTwinsClient(new Uri(adtInstanceUrl), credentials, new DigitalTwinsClientOptions { Transport = new HttpClientTransport(httpClient) });
                 log.LogInformation($"ADT service client connection created.");
             }
             catch (Exception e)
