@@ -27,6 +27,11 @@ These samples were developed and expected to run in Visual Studio 2019. Ensure y
 
 Get the sample project you'll use by downloading this repository as a ZIP file to your machine.
 
+### Deploy the sample resources using ARM templates
+
+[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fandyatwork%2Fdigital-twins-samples%2Fdev%2Fanpetral%2Farmtemplates%2FArmTemplates%2Fadtwithazurefunction.json)  [![Visualize](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/visualizebutton.svg?sanitize=true)](http://armviz.io/#/?load=https%3A%2F%2Fraw.githubusercontent.com%2Fandyatwork%2Fdigital-twins-samples%2Fdev%2Fanpetral%2Farmtemplates%2FArmTemplates%2Fadtwithazurefunction.json)
+
+
 ## Sample project contents
 
 This sample contains two code projects that can be used to set up and simulate a full end-to-end scenario that makes use of Azure Digital Twins.
