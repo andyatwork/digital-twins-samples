@@ -166,7 +166,7 @@
             ],
             "properties": {
                 "roleDefinitionId": "[variables('adtOwnerRole')]",
-                "principalId": "[reference(variables('functionAppName')).identity.principalId]",
+                "principalId": "[resourceId('Microsoft.Web/sites', variables('functionAppName')).identity.principalId]",
                 "principalType": "ServicePrincipal"
             }
         }
@@ -178,7 +178,7 @@
         },
         "FunctionIdentity": {
             "type": "string",
-            "value": "[reference(variables('functionAppName')).identity.principalId]"
+            "value": "[resourceId('Microsoft.Web/sites', variables('functionAppName')).identity.principalId]"
         },
         "ADTInstance": {
           "value": "[reference(parameters('adtInstanceName')).hostName]",
