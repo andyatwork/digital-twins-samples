@@ -176,6 +176,7 @@
             "name": "[concat(parameters('adtInstanceName'), '/Microsoft.Authorization/', guid(uniqueString(parameters('adtInstanceName'))))]",
             "type": "Microsoft.DigitalTwins/digitalTwinsInstances/providers/roleAssignments",
             "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiHelperIdentity'))]",
                 "[parameters('adtInstanceName')]"
             ],
             "properties": {
