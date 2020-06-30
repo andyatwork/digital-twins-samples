@@ -158,7 +158,7 @@
                         "value": "[concat('RunAs=App;AppId=', reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiHelperIdentity')), '2015-08-31-preview').clientId, ';')]"
                     },
                     {
-                        "name": "AdtInstanceHostname",
+                        "name": "ADT_SERVICE_URL",
                         "value": "[reference(parameters('adtInstanceName')).hostName]"
                     }
                 ]
