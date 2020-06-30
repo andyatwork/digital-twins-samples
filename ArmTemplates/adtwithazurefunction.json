@@ -90,12 +90,33 @@
             "location": "[resourceGroup().location]"
         },
         {
+            "apiVersion": "2018-05-01-preview",
+            "name": "[variables('applicationInsightsName')]",
+            "type": "microsoft.insights/components",
+            "location": "[variables('insightsLocation')[environment().name]]",
+            "tags": {
+                "[concat('hidden-link:', resourceId('Microsoft.Web/sites', variables('applicationInsightsName')))]": "Resource"
+            },
+            "properties": {
+                "ApplicationId": "[variables('applicationInsightsName')]",
+                "Request_Source": "IbizaWebAppExtensionCreate"
+            }
+        },
+        {
+            "type": "Microsoft.DigitalTwins/digitalTwinsInstances",
+            "apiVersion": "2020-03-01-preview",
+            "name": "[parameters('adtInstanceName')]",
+            "location": "[parameters('location')]",
+            "properties": {}
+        },
+        {
             "apiVersion": "2019-08-01",
             "type": "Microsoft.Web/sites",
             "name": "[variables('functionAppName')]",
             "location": "[parameters('location')]",
             "kind": "functionapp",
             "dependsOn": [
+                "[resourceId('MMicrosoft.DigitalTwins/digitalTwinsInstances', parameters('adtInstanceName'))]",
                 "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiHelperIdentity'))]",
                 "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
@@ -135,6 +156,10 @@
                     {
                         "name": "AzureServicesAuthConnectionString",
                         "value": "[concat('RunAs=App;AppId=', reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiHelperIdentity')), '2015-08-31-preview').clientId, ';')]"
+                    },
+                    {
+                        "name": "AdtInstanceHostname",
+                        "value": "[reference(parameters('adtInstanceName')).hostName]"
                     }
                 ]
                 }
@@ -145,29 +170,6 @@
                     "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiHelperIdentity'))]": {}
                 }
             }
-        },
-        {
-            "apiVersion": "2018-05-01-preview",
-            "name": "[variables('applicationInsightsName')]",
-            "type": "microsoft.insights/components",
-            "location": "[variables('insightsLocation')[environment().name]]",
-            "tags": {
-                "[concat('hidden-link:', resourceId('Microsoft.Web/sites', variables('applicationInsightsName')))]": "Resource"
-            },
-            "properties": {
-                "ApplicationId": "[variables('applicationInsightsName')]",
-                "Request_Source": "IbizaWebAppExtensionCreate"
-            }
-        },
-        {
-            "type": "Microsoft.DigitalTwins/digitalTwinsInstances",
-            "apiVersion": "2020-03-01-preview",
-            "name": "[parameters('adtInstanceName')]",
-            "location": "[parameters('location')]",
-            "properties": {},
-            "dependsOn": [
-                "[variables('functionAppName')]"
-            ]
         },
         {
             "apiVersion": "2018-09-01-preview",
