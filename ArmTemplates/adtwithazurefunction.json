@@ -116,7 +116,7 @@
             "location": "[parameters('location')]",
             "kind": "functionapp",
             "dependsOn": [
-                "[resourceId('MMicrosoft.DigitalTwins/digitalTwinsInstances', parameters('adtInstanceName'))]",
+                "[resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', parameters('adtInstanceName'))]",
                 "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiHelperIdentity'))]",
                 "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
