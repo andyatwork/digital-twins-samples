@@ -48,7 +48,6 @@
     },
     "variables": {
         "adtOwnerRole": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'bcd981a7-7f74-457b-83e1-cceb9e632ffe')]",
-        "msiHelperIdentity": "[guid(concat(resourceGroup().id, parameters('adtInstanceName'), '-deploymentscriptmsi'))]",
         "functionAppName": "[parameters('appName')]",
         "hostingPlanName": "[parameters('appName')]",
         "applicationInsightsName": "[parameters('appName')]",
@@ -84,12 +83,6 @@
             }
         },
         {
-            "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-            "name": "[variables('msiHelperIdentity')]",
-            "apiVersion": "2018-11-30",
-            "location": "[resourceGroup().location]"
-        },
-        {
             "apiVersion": "2018-05-01-preview",
             "name": "[variables('applicationInsightsName')]",
             "type": "microsoft.insights/components",
@@ -117,7 +110,6 @@
             "kind": "functionapp",
             "dependsOn": [
                 "[resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', parameters('adtInstanceName'))]",
-                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiHelperIdentity'))]",
                 "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
                 "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
             ],
@@ -154,10 +146,6 @@
                         "value": "[variables('functionWorkerRuntime')]"
                     },
                     {
-                        "name": "AzureServicesAuthConnectionString",
-                        "value": "[concat('RunAs=App;AppId=', reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiHelperIdentity')), '2015-08-31-preview').clientId, ';')]"
-                    },
-                    {
                         "name": "ADT_SERVICE_URL",
                         "value": "[reference(parameters('adtInstanceName')).hostName]"
                     }
@@ -165,10 +153,7 @@
                 }
             },
             "identity": {
-                "type": "UserAssigned",
-                "userAssignedIdentities": {
-                    "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiHelperIdentity'))]": {}
-                }
+                "type": "SystemAssigned"
             }
         },
         {
@@ -176,12 +161,12 @@
             "name": "[concat(parameters('adtInstanceName'), '/Microsoft.Authorization/', guid(uniqueString(parameters('adtInstanceName'))))]",
             "type": "Microsoft.DigitalTwins/digitalTwinsInstances/providers/roleAssignments",
             "dependsOn": [
-                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiHelperIdentity'))]",
+                "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]",
                 "[parameters('adtInstanceName')]"
             ],
             "properties": {
                 "roleDefinitionId": "[variables('adtOwnerRole')]",
-                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiHelperIdentity')), '2015-08-31-preview').principalId]",
+                "principalId": "[reference(variables('functionAppName')).identity.principalId]",
                 "principalType": "ServicePrincipal"
             }
         }
@@ -193,7 +178,7 @@
         },
         "FunctionIdentity": {
             "type": "string",
-            "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiHelperIdentity'))]"
+            "value": "[reference(variables('functionAppName')).identity.principalId]"
         },
         "ADTInstance": {
           "value": "[reference(parameters('adtInstanceName')).hostName]",
