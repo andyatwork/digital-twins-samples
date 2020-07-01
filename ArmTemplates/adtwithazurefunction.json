@@ -69,7 +69,7 @@
         "functionAppName": "[concat(parameters('appName'), '-func')]",
         "hostingPlanName": "[concat(parameters('appName'), '-plan')]",
         "webAppHostingPlanName": "[concat(parameters('webAppName'), '-plan')]",
-        "applicationInsightsName": "[parameters('appName')]",
+        "applicationInsightsName": "[concat(parameters('appName'), '-insights')]",
         "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'azfunctions')]",
         "functionWorkerRuntime": "[parameters('runtime')]",
         "insightsLocation": {
