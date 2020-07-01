@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,23 +38,37 @@ namespace SampleFunctionsApp
                 client = new DigitalTwinsClient(new Uri(adtInstanceUrl), credentials, new DigitalTwinsClientOptions { Transport = new HttpClientTransport(httpClient) });
                 log.LogInformation($"ADT service client connection created.");
 
-                if (client != null)
-                {
-                    log.LogInformation($"Attempting to call ADT REST at {adtInstanceUrl}");
-                    AsyncPageable<ModelData> result = client.GetModelsAsync();
-                    await foreach (ModelData md in result)
-                    {
-                        log.LogInformation($"ModelId found: {md.Id}");
-                    }
-                    log.LogInformation("Call completed.");
-                }
+                log.LogInformation($"Attempting to call ADT REST at {adtInstanceUrl}");
+                var randomVersion = new Random().Next(0, Int32.MaxValue);
+                var randomName = Guid.NewGuid().ToString();
+                var createModels = new[] { @"{
+                    ""@id"": ""dtmi:example:Floor;" + randomVersion.ToString() + @""",
+                    ""@type"": ""Interface"",
+                    ""displayName"": """ + randomName + @""",
+                    ""@context"": ""dtmi:dtdl:context;2"",
+                    ""contents"": [
+                        {
+                            ""@type"": ""Relationship"",
+                            ""name"": ""contains"",
+                            ""displayName"": ""contains"",
+                            ""properties"": [
+                                {
+                                ""name"": ""RoomType"",
+                                ""@type"":""Property"",
+                                ""schema"": ""string""
+                                }
+                            ]
+                        }
+                    ]
+                }" };
+
+                var result = await client.CreateModelsAsync(createModels);
+                return (ActionResult)new OkObjectResult($"Authenticated and authorized! Created model Id: {result.Value.First().Id}.");
             }
             catch (Exception e)
             {
                 return (ActionResult)new OkObjectResult($"Error: {e.Message}");
             }
-
-            return (ActionResult)new OkObjectResult($"Wohoo, authenticated and authorized!");
         }
     }
 }
