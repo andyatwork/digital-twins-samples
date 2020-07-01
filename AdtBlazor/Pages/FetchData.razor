@@ -1,0 +1,44 @@
+﻿@page "/fetchdata"
+
+@using AdtBlazor.Data
+@using Azure.DigitalTwins.Core.Models
+@inject ModelsService FetchModelsService
+
+<h1>Your ADT Models</h1>
+
+<p>This component demonstrates fetching data from the ADT service.</p>
+
+@if (models == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>UploadTime</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var model in models)
+            {
+                <tr>
+                    <td>@model.Id</td>
+                    <td>@model.UploadTime</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    private ModelData[] models;
+
+    protected override async Task OnInitializedAsync()
+    {
+        models = await FetchModelsService.GetModelsAsync();
+    }
+}
