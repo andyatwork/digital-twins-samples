@@ -66,8 +66,8 @@
     "variables": {
         "adtOwnerRole": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'bcd981a7-7f74-457b-83e1-cceb9e632ffe')]",
         "adtReaderRole": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'd57506d4-4c8d-48b1-8587-93c323f6a5a3')]",
-        "functionAppName": "[parameters('appName')]",
-        "hostingPlanName": "[parameters('appName')]",
+        "functionAppName": "[concat(parameters('appName'), '-func')]",
+        "hostingPlanName": "[concat(parameters('appName'), '-plan')]",
         "webAppHostingPlanName": "[parameters('webAppName')]",
         "applicationInsightsName": "[parameters('appName')]",
         "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'azfunctions')]",
