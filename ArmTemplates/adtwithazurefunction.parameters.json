@@ -10,6 +10,9 @@
         },
         "appName": {
             "value": "<fill in a name>"
+        },
+        "webAppName": {
+            "value": "<fill in a name>"
         }
     }
 }

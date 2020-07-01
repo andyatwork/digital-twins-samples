@@ -21,6 +21,9 @@
                 "description": "the instance name of the Azure Function resource"
             }
         },
+        "webAppName": {
+            "type": "String"
+        },
         "repoURL": {
             "type": "string",
             "defaultValue": "https://github.com/andyatwork/digital-twins-samples.git",
@@ -62,8 +65,10 @@
     },
     "variables": {
         "adtOwnerRole": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'bcd981a7-7f74-457b-83e1-cceb9e632ffe')]",
+        "adtReaderRole": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'd57506d4-4c8d-48b1-8587-93c323f6a5a3')]",
         "functionAppName": "[parameters('appName')]",
         "hostingPlanName": "[parameters('appName')]",
+        "webAppHostingPlanName": "[parameters('webAppName')]",
         "applicationInsightsName": "[parameters('appName')]",
         "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'azfunctions')]",
         "functionWorkerRuntime": "[parameters('runtime')]",
@@ -125,7 +130,8 @@
             "dependsOn": [
                 "[resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', parameters('adtInstanceName'))]",
                 "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
-                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+                "[resourceId('microsoft.insights/components', variables('applicationInsightsName'))]"
             ],
             "properties": {
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
@@ -177,8 +183,7 @@
                     "properties": {
                         "RepoUrl": "[parameters('repoURL')]",
                         "branch": "[parameters('branch')]",
-                        "IsManualIntegration": true,
-                        "folderPath": "/AdtSampleApp/SampleFunctionsApp"
+                        "IsManualIntegration": true
                     }
                 }
             ],
@@ -186,10 +191,91 @@
                 "type": "SystemAssigned"
             }
         },
-
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2018-11-01",
+            "name": "[parameters('webAppName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DigitalTwins/digitalTwinsInstances', parameters('adtInstanceName'))]",
+                "[concat('Microsoft.Web/serverfarms/', variables('webAppHostingPlanName'))]",
+                "[resourceId('microsoft.insights/components', variables('applicationInsightsName'))]"
+            ],
+            "properties": {
+                "name": "[parameters('webAppName')]",
+                "siteConfig": {
+                    "appSettings": [
+                        {
+                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                            "value": "[reference(resourceId('microsoft.insights/components', variables('applicationInsightsName')), '2018-05-01-preview').InstrumentationKey]"
+                        },
+                        {
+                            "name": "ApplicationInsightsAgent_EXTENSION_VERSION",
+                            "value": "~2"
+                        },
+                        {
+                            "name": "XDT_MicrosoftApplicationInsights_Mode",
+                            "value": "default"
+                        },
+                        {
+                            "name": "ADT_SERVICE_URL",
+                            "value": "[reference(parameters('adtInstanceName')).hostName]"
+                        }
+                    ],
+                    "metadata": [
+                        {
+                            "name": "CURRENT_STACK",
+                            "value": "dotnetcore"
+                        }
+                    ],
+                    "phpVersion": "OFF",
+                    "alwaysOn": "false"
+                },
+                "serverFarmId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourcegroups/', resourceGroup().name, '/providers/Microsoft.Web/serverfarms/', variables('webAppHostingPlanName'))]",
+                "hostingEnvironment": "",
+                "clientAffinityEnabled": true
+            },
+            "resources": [
+                {
+                    "apiVersion": "2018-11-01",
+                    "name": "web",
+                    "type": "sourcecontrols",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/Sites', parameters('webAppName'))]"
+                    ],
+                    "properties": {
+                        "RepoUrl": "[parameters('repoURL')]",
+                        "branch": "[parameters('branch')]",
+                        "IsManualIntegration": true
+                    }
+                }
+            ],
+            "identity": {
+                "type": "SystemAssigned"
+            }
+        },
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2018-11-01",
+            "name": "[variables('webAppHostingPlanName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [],
+            "sku": {
+                "Tier": "Free",
+                "Name": "F1"
+            },
+            "kind": "",
+            "properties": {
+                "name": "[variables('webAppHostingPlanName')]",
+                "workerSize": "0",
+                "workerSizeId": "0",
+                "numberOfWorkers": "0",
+                "hostingEnvironment": ""
+            }
+        },
         {
             "apiVersion": "2018-09-01-preview",
-            "name": "[concat(parameters('adtInstanceName'), '/Microsoft.Authorization/', guid(uniqueString(parameters('adtInstanceName'))))]",
+            "name": "[concat(parameters('adtInstanceName'), '/Microsoft.Authorization/', guid(uniqueString(variables('functionAppName'))))]",
             "type": "Microsoft.DigitalTwins/digitalTwinsInstances/providers/roleAssignments",
             "dependsOn": [
                 "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]",
@@ -198,6 +284,20 @@
             "properties": {
                 "roleDefinitionId": "[variables('adtOwnerRole')]",
                 "principalId": "[reference(resourceId('Microsoft.Web/sites', variables('functionAppName')), '2019-08-01', 'full').identity.principalId]",
+                "principalType": "ServicePrincipal"
+            }
+        },
+        {
+            "apiVersion": "2018-09-01-preview",
+            "name": "[concat(parameters('adtInstanceName'), '/Microsoft.Authorization/', guid(uniqueString(parameters('webAppName'))))]",
+            "type": "Microsoft.DigitalTwins/digitalTwinsInstances/providers/roleAssignments",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]",
+                "[parameters('adtInstanceName')]"
+            ],
+            "properties": {
+                "roleDefinitionId": "[variables('adtReaderRole')]",
+                "principalId": "[reference(resourceId('Microsoft.Web/sites', parameters('webAppName')), '2019-08-01', 'full').identity.principalId]",
                 "principalType": "ServicePrincipal"
             }
         }
@@ -213,6 +313,10 @@
         },
         "ADTInstance": {
           "value": "[reference(parameters('adtInstanceName')).hostName]",
+          "type": "string"
+        },
+        "WebAppUrl": {
+          "value": "[reference(resourceId('Microsoft.Web/sites', parameters('webAppName'))).hostName]",
           "type": "string"
         }
     }
