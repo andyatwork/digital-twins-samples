@@ -5,13 +5,7 @@
         "location": {
             "value": "<fill in a region, such as 'westus2'>"
         },
-        "adtInstanceName": {
-            "value": "<fill in a name>"
-        },
-        "appName": {
-            "value": "<fill in a name>"
-        },
-        "webAppName": {
+            "appName": {
             "value": "<fill in a name>"
         }
     }
