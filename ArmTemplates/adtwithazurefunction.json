@@ -68,7 +68,7 @@
         "adtReaderRole": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'd57506d4-4c8d-48b1-8587-93c323f6a5a3')]",
         "functionAppName": "[concat(parameters('appName'), '-func')]",
         "hostingPlanName": "[concat(parameters('appName'), '-plan')]",
-        "webAppHostingPlanName": "[parameters('webAppName')]",
+        "webAppHostingPlanName": "[concat(parameters('webAppName'), '-plan')]",
         "applicationInsightsName": "[parameters('appName')]",
         "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'azfunctions')]",
         "functionWorkerRuntime": "[parameters('runtime')]",
