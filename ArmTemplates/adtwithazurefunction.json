@@ -29,6 +29,13 @@
                 "description": "The branch of the GitHub repository to use."
             }
         },
+        "functionAppBranch": {
+            "type": "string",
+            "defaultValue": "dev/anpetral/funcsolution",
+            "metadata": {
+                "description": "The branch of the GitHub repository to use for the function app."
+            }
+        },
         "storageAccountType": {
             "type": "string",
             "defaultValue": "Standard_LRS",
@@ -175,7 +182,7 @@
                     ],
                     "properties": {
                         "RepoUrl": "[parameters('repoURL')]",
-                        "branch": "[parameters('branch')]",
+                        "branch": "[parameters('functionAppBranch')]",
                         "IsManualIntegration": true
                     }
                 }

@@ -39,7 +39,7 @@ namespace SampleFunctionsApp
                 log.LogInformation($"ADT service client connection created.");
 
                 log.LogInformation($"Attempting to call ADT REST at {adtInstanceUrl}");
-                var randomVersion = new Random().Next(0, Int32.MaxValue);
+                var randomVersion = new Random().Next(0, 1000);
                 var randomName = Guid.NewGuid().ToString();
                 var createModels = new[] { @"{
                     ""@id"": ""dtmi:example:Floor;" + randomVersion.ToString() + @""",
